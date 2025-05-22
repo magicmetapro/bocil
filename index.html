@@ -53,7 +53,8 @@
     }
 
     .card.matched {
-      box-shadow: 0 0 10px 3px limegreen;
+      animation: blink 0.5s ease-in-out 2;
+      box-shadow: 0 0 12px 4px #32cd32;
       cursor: default;
     }
 
@@ -88,12 +89,30 @@
       text-align: center;
     }
 
-    @media (min-width: 500px) {
-      h1 {
-        font-size: 2.5rem;
+    @keyframes blink {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.15); background-color: #adff2f; }
+      100% { transform: scale(1); }
+    }
+
+    .confetti {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      pointer-events: none;
+      animation: float 1s ease-out forwards;
+      font-size: 18px;
+      color: gold;
+    }
+
+    @keyframes float {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
       }
-      .card-face {
-        font-size: 3rem;
+      100% {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.5);
       }
     }
   </style>
@@ -105,8 +124,9 @@
 <div class="message" id="message"></div>
 
 <script>
-  const emojis = ["🚗", "🐱", "🐰"];
-  const cards = [...emojis, ...emojis].sort(() => Math.random() - 0.5);
+  const emojis = ["🚗", "🐱", "🐰", "✈️", "🐘"];
+  const selected = emojis.slice(0, 4); // ambil 4 jenis untuk 8 kartu
+  const cards = [...selected, ...selected].sort(() => Math.random() - 0.5);
 
   const board = document.getElementById("gameBoard");
   const message = document.getElementById("message");
@@ -114,6 +134,14 @@
   let flipped = [];
   let lock = false;
   let matchedCount = 0;
+
+  function showConfetti(target) {
+    const confetti = document.createElement("div");
+    confetti.className = "confetti";
+    confetti.textContent = "✨";
+    target.appendChild(confetti);
+    setTimeout(() => confetti.remove(), 1000);
+  }
 
   function createCard(emoji) {
     const card = document.createElement("div");
@@ -135,13 +163,18 @@
         const [first, second] = flipped;
 
         if (first.emoji === second.emoji) {
-          first.card.classList.add("matched");
-          second.card.classList.add("matched");
+          setTimeout(() => {
+            first.card.classList.add("matched");
+            second.card.classList.add("matched");
+            showConfetti(first.card);
+            showConfetti(second.card);
+          }, 200);
+
           matchedCount++;
           flipped = [];
           lock = false;
 
-          if (matchedCount === emojis.length) {
+          if (matchedCount === selected.length) {
             message.textContent = "🎊 Hebat! Kamu menemukan semua pasangan!";
           }
         } else {
