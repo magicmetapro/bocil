@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Memory Game Level</title>
+  <title>Memory Game Anak</title>
   <style>
     body {
       font-family: 'Comic Sans MS', cursive, sans-serif;
-      background: linear-gradient(145deg, #ffe4e1, #e0ffff);
+      background: linear-gradient(145deg, #e0ffe4, #f0fff0);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -16,7 +16,7 @@
     }
     h1 {
       font-size: 2rem;
-      color: #ff1493;
+      color: #228b22;
       text-shadow: 1px 1px #fff;
       margin-bottom: 10px;
       text-align: center;
@@ -32,7 +32,7 @@
       width: 100%;
       max-width: 400px;
       margin-bottom: 20px;
-      grid-template-columns: repeat(4, 1fr); /* ❗ Maksimal 4 kolom */
+      grid-template-columns: repeat(4, 1fr);
     }
     .card {
       background: transparent;
@@ -63,7 +63,7 @@
       box-shadow: 0 0 8px rgba(0,0,0,0.2);
     }
     .card-front {
-      background: #1e90ff;
+      background: #2e8b57;
       color: white;
     }
     .card-back {
@@ -83,7 +83,7 @@
     button {
       padding: 10px 20px;
       font-size: 1rem;
-      background-color: #ff1493;
+      background-color: #2e8b57;
       color: white;
       border: none;
       border-radius: 8px;
@@ -93,7 +93,6 @@
       background: #aaa;
       cursor: not-allowed;
     }
-
     @media (min-width: 400px) {
       .card-face {
         font-size: 2.5rem;
@@ -108,6 +107,9 @@
   <div class="message" id="message"></div>
   <button id="nextBtn" disabled>Lanjut Level Berikutnya ➡️</button>
 
+  <!-- Suara Horeee -->
+  <audio id="matchSound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_246d635a9f.mp3" preload="auto"></audio>
+
 <script>
   const emojis = [
     "🍇","🚎","🐨","🐹","🚀","🐮","🚐","🍍","🍉","🥝",
@@ -121,6 +123,7 @@
   const message = document.getElementById("message");
   const nextBtn = document.getElementById("nextBtn");
   const levelLabel = document.getElementById("levelLabel");
+  const matchSound = document.getElementById("matchSound");
 
   let flippedCards = [];
   let lockBoard = false;
@@ -176,6 +179,8 @@
           if (first.symbol === second.symbol) {
             first.card.classList.add("matched");
             second.card.classList.add("matched");
+            matchSound.currentTime = 0;
+            matchSound.play();
             matchedPairs++;
             flippedCards = [];
             lockBoard = false;
