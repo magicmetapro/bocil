@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Game Memory Bocil</title>
+  <title>Game Memory Anak</title>
   <style>
     * {
       box-sizing: border-box;
@@ -19,29 +19,32 @@
       align-items: center;
       justify-content: flex-start;
       min-height: 100vh;
-      padding: 30px 20px;
+      padding: 20px;
     }
 
     h1 {
       margin-bottom: 20px;
-      font-size: 2.5rem;
+      font-size: 2rem;
       color: #ff1493;
-      text-shadow: 2px 2px #fff;
+      text-shadow: 1px 1px #fff;
+      text-align: center;
     }
 
     .game-board {
       display: grid;
-      grid-template-columns: repeat(3, 120px);
-      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+      gap: 15px;
+      width: 100%;
+      max-width: 400px;
       perspective: 1000px;
     }
 
     .card {
-      width: 120px;
-      height: 120px;
+      width: 100%;
+      aspect-ratio: 1 / 1;
       position: relative;
       transform-style: preserve-3d;
-      transition: transform 0.8s;
+      transition: transform 0.7s;
       cursor: pointer;
     }
 
@@ -50,7 +53,7 @@
     }
 
     .card.matched {
-      box-shadow: 0 0 15px 5px limegreen;
+      box-shadow: 0 0 10px 3px limegreen;
       cursor: default;
     }
 
@@ -63,8 +66,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 50px;
-      box-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+      font-size: 2.2rem;
+      box-shadow: 1px 1px 6px rgba(0,0,0,0.2);
     }
 
     .card-front {
@@ -73,21 +76,31 @@
     }
 
     .card-back {
-      background: #fff;
+      background: #ffffff;
       transform: rotateY(180deg);
     }
 
     .message {
-      margin-top: 25px;
-      font-size: 1.5rem;
-      color: #32cd32;
+      margin-top: 20px;
+      font-size: 1.2rem;
+      color: #2e8b57;
       font-weight: bold;
+      text-align: center;
+    }
+
+    @media (min-width: 500px) {
+      h1 {
+        font-size: 2.5rem;
+      }
+      .card-face {
+        font-size: 3rem;
+      }
     }
   </style>
 </head>
 <body>
 
-<h1>🎉 Memory Match Anak 🎉</h1>
+<h1>🎉 Game Memory Anak 🎉</h1>
 <div class="game-board" id="gameBoard"></div>
 <div class="message" id="message"></div>
 
@@ -124,12 +137,12 @@
         if (first.emoji === second.emoji) {
           first.card.classList.add("matched");
           second.card.classList.add("matched");
-          matchedCount += 1;
+          matchedCount++;
           flipped = [];
           lock = false;
 
           if (matchedCount === emojis.length) {
-            message.textContent = "🎊 Hebat! Semua pasangan ditemukan! 🎊";
+            message.textContent = "🎊 Hebat! Kamu menemukan semua pasangan!";
           }
         } else {
           setTimeout(() => {
