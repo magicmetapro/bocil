@@ -7,129 +7,136 @@
   <style>
     * {
       box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
     body {
-      font-family: Arial, sans-serif;
-      background: #f0f8ff;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      background: linear-gradient(145deg, #ffe4e1, #e0ffff);
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       min-height: 100vh;
-      margin: 0;
+      padding: 30px 20px;
     }
 
     h1 {
       margin-bottom: 20px;
+      font-size: 2.5rem;
+      color: #ff1493;
+      text-shadow: 2px 2px #fff;
     }
 
     .game-board {
       display: grid;
-      grid-template-columns: repeat(3, 100px);
-      grid-gap: 15px;
+      grid-template-columns: repeat(3, 120px);
+      gap: 20px;
+      perspective: 1000px;
     }
 
     .card {
-      width: 100px;
-      height: 100px;
-      perspective: 1000px;
+      width: 120px;
+      height: 120px;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.8s;
       cursor: pointer;
     }
 
-    .card-inner {
-      width: 100%;
-      height: 100%;
-      transition: transform 0.6s;
-      transform-style: preserve-3d;
-      position: relative;
-    }
-
-    .card.flip .card-inner {
+    .card.flip {
       transform: rotateY(180deg);
     }
 
-    .card-front, .card-back {
+    .card.matched {
+      box-shadow: 0 0 15px 5px limegreen;
+      cursor: default;
+    }
+
+    .card-face {
       position: absolute;
       width: 100%;
       height: 100%;
       backface-visibility: hidden;
-      border-radius: 10px;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 50px;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.3);
     }
 
     .card-front {
       background: #1e90ff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       color: white;
-      font-size: 24px;
     }
 
     .card-back {
-      background: white;
+      background: #fff;
       transform: rotateY(180deg);
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
 
-    .card img {
-      width: 60px;
-      height: 60px;
+    .message {
+      margin-top: 25px;
+      font-size: 1.5rem;
+      color: #32cd32;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
 
-<h1>Memory Match Game</h1>
+<h1>🎉 Memory Match Anak 🎉</h1>
 <div class="game-board" id="gameBoard"></div>
+<div class="message" id="message"></div>
 
 <script>
-  const images = [
-    "🍎", "🐶", "🚗", // emoji bisa diganti dengan gambar jika diinginkan
-  ];
+  const emojis = ["🚗", "🐱", "🐰"];
+  const cards = [...emojis, ...emojis].sort(() => Math.random() - 0.5);
 
-  // Gandakan dan acak
-  let cards = [...images, ...images].sort(() => 0.5 - Math.random());
+  const board = document.getElementById("gameBoard");
+  const message = document.getElementById("message");
 
-  const gameBoard = document.getElementById("gameBoard");
+  let flipped = [];
+  let lock = false;
+  let matchedCount = 0;
 
-  let flippedCards = [];
-  let lockBoard = false;
-
-  function createCard(symbol) {
+  function createCard(emoji) {
     const card = document.createElement("div");
     card.classList.add("card");
 
     card.innerHTML = `
-      <div class="card-inner">
-        <div class="card-front">?</div>
-        <div class="card-back"><span style="font-size:40px">${symbol}</span></div>
-      </div>
+      <div class="card-face card-front">❓</div>
+      <div class="card-face card-back">${emoji}</div>
     `;
 
     card.addEventListener("click", () => {
-      if (lockBoard || card.classList.contains("matched") || card.classList.contains("flip")) return;
+      if (lock || card.classList.contains("flip") || card.classList.contains("matched")) return;
 
       card.classList.add("flip");
-      flippedCards.push({ card, symbol });
+      flipped.push({ card, emoji });
 
-      if (flippedCards.length === 2) {
-        lockBoard = true;
-        const [first, second] = flippedCards;
+      if (flipped.length === 2) {
+        lock = true;
+        const [first, second] = flipped;
 
-        if (first.symbol === second.symbol) {
+        if (first.emoji === second.emoji) {
           first.card.classList.add("matched");
           second.card.classList.add("matched");
-          flippedCards = [];
-          lockBoard = false;
+          matchedCount += 1;
+          flipped = [];
+          lock = false;
+
+          if (matchedCount === emojis.length) {
+            message.textContent = "🎊 Hebat! Semua pasangan ditemukan! 🎊";
+          }
         } else {
           setTimeout(() => {
             first.card.classList.remove("flip");
             second.card.classList.remove("flip");
-            flippedCards = [];
-            lockBoard = false;
+            flipped = [];
+            lock = false;
           }, 1000);
         }
       }
@@ -138,15 +145,18 @@
     return card;
   }
 
-  function initGame() {
-    gameBoard.innerHTML = "";
-    cards.forEach(symbol => {
-      const cardElement = createCard(symbol);
-      gameBoard.appendChild(cardElement);
+  function startGame() {
+    board.innerHTML = "";
+    message.textContent = "";
+    matchedCount = 0;
+
+    cards.forEach(emoji => {
+      const cardEl = createCard(emoji);
+      board.appendChild(cardEl);
     });
   }
 
-  initGame();
+  startGame();
 </script>
 
 </body>
