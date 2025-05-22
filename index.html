@@ -30,8 +30,9 @@
       display: grid;
       gap: 10px;
       width: 100%;
-      max-width: 500px;
+      max-width: 400px;
       margin-bottom: 20px;
+      grid-template-columns: repeat(4, 1fr); /* ❗ Maksimal 4 kolom */
     }
     .card {
       background: transparent;
@@ -142,9 +143,6 @@
     const cardValues = [...selectedEmojis, ...selectedEmojis].sort(() => 0.5 - Math.random());
 
     gameBoard.innerHTML = "";
-
-    const columnCount = Math.min(pairCount * 2, 6);
-    gameBoard.style.gridTemplateColumns = `repeat(${columnCount}, 1fr)`;
 
     cardValues.forEach(symbol => {
       const card = document.createElement("div");
