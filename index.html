@@ -3,207 +3,210 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Game Memory Anak</title>
+  <title>Memory Game Level</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
     body {
       font-family: 'Comic Sans MS', cursive, sans-serif;
       background: linear-gradient(145deg, #ffe4e1, #e0ffff);
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
-      min-height: 100vh;
       padding: 20px;
+      min-height: 100vh;
     }
-
     h1 {
-      margin-bottom: 20px;
       font-size: 2rem;
       color: #ff1493;
       text-shadow: 1px 1px #fff;
+      margin-bottom: 10px;
       text-align: center;
     }
-
+    .level-label {
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+      color: #333;
+    }
     .game-board {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-      gap: 15px;
+      gap: 10px;
       width: 100%;
-      max-width: 400px;
+      max-width: 500px;
+      margin-bottom: 20px;
+    }
+    .card {
+      background: transparent;
+      width: 100%;
+      aspect-ratio: 1/1;
       perspective: 1000px;
     }
-
-    .card {
+    .card-inner {
       width: 100%;
-      aspect-ratio: 1 / 1;
-      position: relative;
+      height: 100%;
+      transition: transform 0.6s;
       transform-style: preserve-3d;
-      transition: transform 0.7s;
-      cursor: pointer;
+      position: relative;
     }
-
-    .card.flip {
+    .card.flip .card-inner {
       transform: rotateY(180deg);
     }
-
-    .card.matched {
-      animation: blink 0.5s ease-in-out 2;
-      box-shadow: 0 0 12px 4px #32cd32;
-      cursor: default;
-    }
-
     .card-face {
       position: absolute;
       width: 100%;
       height: 100%;
       backface-visibility: hidden;
-      border-radius: 15px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 2.2rem;
-      box-shadow: 1px 1px 6px rgba(0,0,0,0.2);
+      font-size: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.2);
     }
-
     .card-front {
       background: #1e90ff;
       color: white;
     }
-
     .card-back {
-      background: #ffffff;
+      background: #fff;
       transform: rotateY(180deg);
     }
-
+    .matched .card-inner {
+      box-shadow: 0 0 10px 3px limegreen;
+    }
     .message {
-      margin-top: 20px;
       font-size: 1.2rem;
       color: #2e8b57;
       font-weight: bold;
       text-align: center;
+      margin-bottom: 15px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      background-color: #ff1493;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:disabled {
+      background: #aaa;
+      cursor: not-allowed;
     }
 
-    @keyframes blink {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.15); background-color: #adff2f; }
-      100% { transform: scale(1); }
-    }
-
-    .confetti {
-      position: absolute;
-      top: 5px;
-      left: 5px;
-      pointer-events: none;
-      animation: float 1s ease-out forwards;
-      font-size: 18px;
-      color: gold;
-    }
-
-    @keyframes float {
-      0% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-      100% {
-        opacity: 0;
-        transform: translateY(-50px) scale(0.5);
+    @media (min-width: 400px) {
+      .card-face {
+        font-size: 2.5rem;
       }
     }
   </style>
 </head>
 <body>
-
-<h1>🎉 Game Memory Anak 🎉</h1>
-<div class="game-board" id="gameBoard"></div>
-<div class="message" id="message"></div>
+  <h1>🎉 Memory Game Anak 🎉</h1>
+  <div class="level-label" id="levelLabel">Level 1</div>
+  <div class="game-board" id="gameBoard"></div>
+  <div class="message" id="message"></div>
+  <button id="nextBtn" disabled>Lanjut Level Berikutnya ➡️</button>
 
 <script>
-  const emojis = ["🚗", "🐱", "🐰", "✈️", "🐘"];
-  const selected = emojis.slice(0, 4); // ambil 4 jenis untuk 8 kartu
-  const cards = [...selected, ...selected].sort(() => Math.random() - 0.5);
+  const emojis = [
+    "🍇","🚎","🐨","🐹","🚀","🐮","🚐","🍍","🍉","🥝",
+    "🐵","🐱","🍓","🐼","🐯","🐶","🐰","🦊","🐸","🚙",
+    "🚌","🦁","🥭","🚑","🚁","🚒","🚓","🚗","🏎️","🍑"
+  ];
 
-  const board = document.getElementById("gameBoard");
+  let level = 1;
+  const maxLevel = 30;
+  const gameBoard = document.getElementById("gameBoard");
   const message = document.getElementById("message");
+  const nextBtn = document.getElementById("nextBtn");
+  const levelLabel = document.getElementById("levelLabel");
 
-  let flipped = [];
-  let lock = false;
-  let matchedCount = 0;
+  let flippedCards = [];
+  let lockBoard = false;
+  let matchedPairs = 0;
 
-  function showConfetti(target) {
-    const confetti = document.createElement("div");
-    confetti.className = "confetti";
-    confetti.textContent = "✨";
-    target.appendChild(confetti);
-    setTimeout(() => confetti.remove(), 1000);
-  }
+  nextBtn.addEventListener("click", () => {
+    level++;
+    startLevel();
+  });
 
-  function createCard(emoji) {
-    const card = document.createElement("div");
-    card.classList.add("card");
+  function startLevel() {
+    message.textContent = "";
+    levelLabel.textContent = "Level " + level;
+    nextBtn.disabled = true;
+    matchedPairs = 0;
+    flippedCards = [];
 
-    card.innerHTML = `
-      <div class="card-face card-front">❓</div>
-      <div class="card-face card-back">${emoji}</div>
-    `;
+    const pairCount = level;
+    const selectedEmojis = emojis.slice(0, pairCount);
+    const cardValues = [...selectedEmojis, ...selectedEmojis].sort(() => 0.5 - Math.random());
 
-    card.addEventListener("click", () => {
-      if (lock || card.classList.contains("flip") || card.classList.contains("matched")) return;
+    gameBoard.innerHTML = "";
 
-      card.classList.add("flip");
-      flipped.push({ card, emoji });
+    const columnCount = Math.min(pairCount * 2, 6);
+    gameBoard.style.gridTemplateColumns = `repeat(${columnCount}, 1fr)`;
 
-      if (flipped.length === 2) {
-        lock = true;
-        const [first, second] = flipped;
+    cardValues.forEach(symbol => {
+      const card = document.createElement("div");
+      card.classList.add("card");
 
-        if (first.emoji === second.emoji) {
-          setTimeout(() => {
+      const cardInner = document.createElement("div");
+      cardInner.classList.add("card-inner");
+
+      const front = document.createElement("div");
+      front.classList.add("card-face", "card-front");
+      front.textContent = "❓";
+
+      const back = document.createElement("div");
+      back.classList.add("card-face", "card-back");
+      back.textContent = symbol;
+
+      cardInner.appendChild(front);
+      cardInner.appendChild(back);
+      card.appendChild(cardInner);
+
+      card.addEventListener("click", () => {
+        if (lockBoard || card.classList.contains("flip") || card.classList.contains("matched")) return;
+
+        card.classList.add("flip");
+        flippedCards.push({ card, symbol });
+
+        if (flippedCards.length === 2) {
+          lockBoard = true;
+          const [first, second] = flippedCards;
+
+          if (first.symbol === second.symbol) {
             first.card.classList.add("matched");
             second.card.classList.add("matched");
-            showConfetti(first.card);
-            showConfetti(second.card);
-          }, 200);
+            matchedPairs++;
+            flippedCards = [];
+            lockBoard = false;
 
-          matchedCount++;
-          flipped = [];
-          lock = false;
-
-          if (matchedCount === selected.length) {
-            message.textContent = "🎊 Hebat! Kamu menemukan semua pasangan!";
+            if (matchedPairs === pairCount) {
+              message.textContent = "✅ Level Selesai! Siap ke level berikutnya!";
+              if (level < maxLevel) {
+                nextBtn.disabled = false;
+              } else {
+                message.textContent = "🎉 Selamat! Kamu telah menyelesaikan semua level!";
+                nextBtn.disabled = true;
+              }
+            }
+          } else {
+            setTimeout(() => {
+              first.card.classList.remove("flip");
+              second.card.classList.remove("flip");
+              flippedCards = [];
+              lockBoard = false;
+            }, 1000);
           }
-        } else {
-          setTimeout(() => {
-            first.card.classList.remove("flip");
-            second.card.classList.remove("flip");
-            flipped = [];
-            lock = false;
-          }, 1000);
         }
-      }
-    });
+      });
 
-    return card;
-  }
-
-  function startGame() {
-    board.innerHTML = "";
-    message.textContent = "";
-    matchedCount = 0;
-
-    cards.forEach(emoji => {
-      const cardEl = createCard(emoji);
-      board.appendChild(cardEl);
+      gameBoard.appendChild(card);
     });
   }
 
-  startGame();
+  startLevel();
 </script>
-
 </body>
 </html>
