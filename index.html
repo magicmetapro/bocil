@@ -33,10 +33,12 @@
       font-size: 1.2rem;
       color: #333;
     }
-    select {
+    input[type="number"] {
       font-size: 1rem;
       padding: 5px;
+      width: 80px;
       border-radius: 6px;
+      border: 1px solid #ccc;
     }
     .game-board {
       display: grid;
@@ -105,10 +107,18 @@
       background: #aaa;
       cursor: not-allowed;
     }
-    @media (min-width: 400px) {
-      .card-face {
-        font-size: 2.5rem;
-      }
+    .reward {
+      background: #fff8dc;
+      border: 2px dashed orange;
+      padding: 10px;
+      border-radius: 10px;
+      margin-top: 10px;
+      font-weight: bold;
+      animation: pop 0.5s ease-in-out;
+    }
+    @keyframes pop {
+      0% { transform: scale(0.5); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
     }
   </style>
 </head>
@@ -116,16 +126,16 @@
   <h1>🎉 MEMORY GAME ANAK 🎉</h1>
   <div class="level-controls">
     <div class="level-label" id="levelLabel">LEVEL 1</div>
-    <select id="levelSelect">
-      <!-- Levels 1 to 30 -->
-      ${Array.from({length: 30}, (_, i) => `<option value="${i+1}">LEVEL ${i+1}</option>`).join('')}
-    </select>
+    <input type="number" id="levelInput" min="1" max="30" value="1" />
+    <button onclick="goToLevel()">GO</button>
   </div>
   <div class="game-board" id="gameBoard"></div>
   <div class="message" id="message"></div>
   <button id="nextBtn" disabled>LANJUT LEVEL BERIKUTNYA ➡️</button>
+  <div id="rewardBox"></div>
 
   <audio id="matchSound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_246d635a9f.mp3" preload="auto"></audio>
+  <audio id="levelUpSound" src="https://cdn.pixabay.com/audio/2022/10/25/audio_47c0c6ef2d.mp3" preload="auto"></audio>
 
 <script>
   const emojis = [
@@ -140,29 +150,35 @@
   const message = document.getElementById("message");
   const nextBtn = document.getElementById("nextBtn");
   const levelLabel = document.getElementById("levelLabel");
-  const levelSelect = document.getElementById("levelSelect");
+  const levelInput = document.getElementById("levelInput");
   const matchSound = document.getElementById("matchSound");
+  const levelUpSound = document.getElementById("levelUpSound");
+  const rewardBox = document.getElementById("rewardBox");
 
   let flippedCards = [];
   let lockBoard = false;
   let matchedPairs = 0;
 
-  levelSelect.addEventListener("change", (e) => {
-    level = parseInt(e.target.value);
-    startLevel();
-  });
+  function goToLevel() {
+    const inputLevel = parseInt(levelInput.value);
+    if (inputLevel >= 1 && inputLevel <= maxLevel) {
+      level = inputLevel;
+      startLevel();
+    }
+  }
 
   nextBtn.addEventListener("click", () => {
     if (level < maxLevel) {
       level++;
-      levelSelect.value = level;
+      levelInput.value = level;
       startLevel();
     }
   });
 
   function startLevel() {
     message.textContent = "";
-    levelLabel.textContent = "LEVEL " + level;
+    rewardBox.innerHTML = "";
+    levelLabel.textContent = `LEVEL ${level}`;
     nextBtn.disabled = true;
     matchedPairs = 0;
     flippedCards = [];
@@ -212,8 +228,10 @@
             lockBoard = false;
 
             if (matchedPairs === pairCount) {
+              levelUpSound.play();
               message.textContent = "✅ LEVEL SELESAI! SIAP KE LEVEL BERIKUTNYA!";
               nextBtn.disabled = level >= maxLevel;
+              rewardBox.innerHTML = `<div class='reward'>🎁 KAMU MENDAPAT STIKER LEVEL ${level}!</div>`;
             }
           } else {
             setTimeout(() => {
