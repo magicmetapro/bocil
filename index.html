@@ -13,6 +13,7 @@
       align-items: center;
       padding: 20px;
       min-height: 100vh;
+      text-transform: uppercase;
     }
     h1 {
       font-size: 2rem;
@@ -21,10 +22,21 @@
       margin-bottom: 10px;
       text-align: center;
     }
+    .level-controls {
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
     .level-label {
       font-size: 1.2rem;
-      margin-bottom: 15px;
       color: #333;
+    }
+    select {
+      font-size: 1rem;
+      padding: 5px;
+      border-radius: 6px;
     }
     .game-board {
       display: grid;
@@ -101,13 +113,18 @@
   </style>
 </head>
 <body>
-  <h1>🎉 Memory Game Anak 🎉</h1>
-  <div class="level-label" id="levelLabel">Level 1</div>
+  <h1>🎉 MEMORY GAME ANAK 🎉</h1>
+  <div class="level-controls">
+    <div class="level-label" id="levelLabel">LEVEL 1</div>
+    <select id="levelSelect">
+      <!-- Levels 1 to 30 -->
+      ${Array.from({length: 30}, (_, i) => `<option value="${i+1}">LEVEL ${i+1}</option>`).join('')}
+    </select>
+  </div>
   <div class="game-board" id="gameBoard"></div>
   <div class="message" id="message"></div>
-  <button id="nextBtn" disabled>Lanjut Level Berikutnya ➡️</button>
+  <button id="nextBtn" disabled>LANJUT LEVEL BERIKUTNYA ➡️</button>
 
-  <!-- Suara Horeee -->
   <audio id="matchSound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_246d635a9f.mp3" preload="auto"></audio>
 
 <script>
@@ -123,20 +140,29 @@
   const message = document.getElementById("message");
   const nextBtn = document.getElementById("nextBtn");
   const levelLabel = document.getElementById("levelLabel");
+  const levelSelect = document.getElementById("levelSelect");
   const matchSound = document.getElementById("matchSound");
 
   let flippedCards = [];
   let lockBoard = false;
   let matchedPairs = 0;
 
-  nextBtn.addEventListener("click", () => {
-    level++;
+  levelSelect.addEventListener("change", (e) => {
+    level = parseInt(e.target.value);
     startLevel();
+  });
+
+  nextBtn.addEventListener("click", () => {
+    if (level < maxLevel) {
+      level++;
+      levelSelect.value = level;
+      startLevel();
+    }
   });
 
   function startLevel() {
     message.textContent = "";
-    levelLabel.textContent = "Level " + level;
+    levelLabel.textContent = "LEVEL " + level;
     nextBtn.disabled = true;
     matchedPairs = 0;
     flippedCards = [];
@@ -186,13 +212,8 @@
             lockBoard = false;
 
             if (matchedPairs === pairCount) {
-              message.textContent = "✅ Level Selesai! Siap ke level berikutnya!";
-              if (level < maxLevel) {
-                nextBtn.disabled = false;
-              } else {
-                message.textContent = "🎉 Selamat! Kamu telah menyelesaikan semua level!";
-                nextBtn.disabled = true;
-              }
+              message.textContent = "✅ LEVEL SELESAI! SIAP KE LEVEL BERIKUTNYA!";
+              nextBtn.disabled = level >= maxLevel;
             }
           } else {
             setTimeout(() => {
@@ -209,6 +230,7 @@
     });
   }
 
+  // Inisialisasi pertama
   startLevel();
 </script>
 </body>
